@@ -2,7 +2,6 @@ from time import sleep
 from selenium import webdriver
 import GithubAutomation
 import curses
-import os
 
 options = [' Create New ', ' List Repos ', ' Delete Repo ', ' Add Credentials ', ' Exit ']
 
@@ -42,10 +41,13 @@ def main(stdscr):
         elif(key == curses.KEY_DOWN and current_selection<5):
             current_selection+=1
         elif(key == curses.KEY_ENTER or key in [10, 13]):
-            if(current_selection == 5):
-                exit()
             if(current_selection == 1):
                 GithubAutomation.CreateRepo(stdscr)
+            if(current_selection == 2):
+                GithubAutomation.ListRepo(stdscr)
             if(current_selection == 4):
                 GithubAutomation.AddCredentials(stdscr)
+            if(current_selection == 5):
+                exit()
+            
 curses.wrapper(main)
