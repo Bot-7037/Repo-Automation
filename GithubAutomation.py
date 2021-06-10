@@ -108,3 +108,47 @@ def AddCredentials(stdscr):
     cred = username + password
     file.write(cred)
     file.close()
+
+
+def ListRepo(stdscr):
+    URL='https://api.github.com/users/Bot-7037/repos'
+    lics = ["Apache License 2.0",
+    "GNU General Public License v3.0",
+    "MIT License",
+    'BSD 2-Clause "Simplified" License',
+    'BSD 3-Clause "New" or "Revised" License',
+    "Boost Software License 1.0",
+    "Creative Commons Zero v1.0 Universal",
+    "Eclipse Public License 2.0",
+    "GNU Affero General Public License v3.0",
+    "GNU General Public License v2.0",
+    "GNU Lesser General Public License v2.1",
+    "Mozilla Public License 2.0",
+    "The Unlicense"]
+
+    y, x = stdscr.getmaxyx()
+    stdscr.clear()
+    _ = 'FETCHING'
+    stdscr.addstr(y//2, x//2-len(_)//2, _)
+    stdscr.refresh()
+    from bs4 import BeautifulSoup
+    import requests
+    page = requests.get(URL)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    soup = str(soup).split(',')
+
+    repoList=[]
+    for i in soup:
+        if('"name"' in i):
+            repoName = i.split(':')[1]
+            repoName = repoName[1:-1]
+            if(repoName in lics): continue
+            repoList.append(repoName)
+    
+    stdscr.clear()
+    for idx,i in enumerate(repoList):
+        stdscr.addstr(y//2 - len(repoList)//2 +idx, x//2 - len(i)//2, i)
+    stdscr.refresh()
+    stdscr.getch()
+    stdscr.clear()
+    stdscr.refresh()
