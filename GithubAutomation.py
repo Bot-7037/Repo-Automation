@@ -109,46 +109,55 @@ def AddCredentials(stdscr):
     file.write(cred)
     file.close()
 
-
 def ListRepo(stdscr):
-    URL='https://api.github.com/users/Bot-7037/repos'
-    lics = ["Apache License 2.0",
-    "GNU General Public License v3.0",
-    "MIT License",
-    'BSD 2-Clause "Simplified" License',
-    'BSD 3-Clause "New" or "Revised" License',
-    "Boost Software License 1.0",
-    "Creative Commons Zero v1.0 Universal",
-    "Eclipse Public License 2.0",
-    "GNU Affero General Public License v3.0",
-    "GNU General Public License v2.0",
-    "GNU Lesser General Public License v2.1",
-    "Mozilla Public License 2.0",
-    "The Unlicense"]
+    username = open('./src/credentials','r').read().split()[0]
+    URL=f'https://api.github.com/users/{username}/repos'
 
     y, x = stdscr.getmaxyx()
     stdscr.clear()
     _ = 'FETCHING'
     stdscr.addstr(y//2, x//2-len(_)//2, _)
     stdscr.refresh()
-    from bs4 import BeautifulSoup
-    import requests
-    page = requests.get(URL)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    soup = str(soup).split(',')
 
     repoList=[]
-    for i in soup:
-        if('"name"' in i):
-            repoName = i.split(':')[1]
-            repoName = repoName[1:-1]
-            if(repoName in lics): continue
-            repoList.append(repoName)
-    
+    created = []    
+    import pandas as pd
+    df = pd.read_json(URL)
+    for i,row in df.iterrows():
+        repoList.append(row['name'])
+        created.append(row['created_at'].date())
     stdscr.clear()
-    for idx,i in enumerate(repoList):
-        stdscr.addstr(y//2 - len(repoList)//2 +idx, x//2 - len(i)//2, i)
-    stdscr.refresh()
-    stdscr.getch()
+
+    current_selection = 1
+    while(1):
+        for idx,i in enumerate(repoList):
+            if(current_selection == idx+1):
+                stdscr.attron(curses.color_pair(1))
+                stdscr.addstr(y//2 - len(repoList)//2 +idx, x//2 - len(i)//2, i)
+                stdscr.attroff(curses.color_pair(1))
+                continue
+            stdscr.addstr(y//2 - len(repoList)//2 +idx, x//2 - len(i)//2, i)
+        stdscr.refresh()
+        key = stdscr.getch()
+        if(key == curses.KEY_UP and current_selection>1):
+            current_selection -=1
+        elif(key == curses.KEY_DOWN and current_selection<len(repoList)):
+            current_selection+=1
+        elif(key in [curses.KEY_ENTER, 10, 13]):
+            stdscr.clear()
+            details = []
+            new_options = ['name', 'id', 'description', 'fork', 'forks', 'created_at']
+            for i in new_options:
+                if(i == 'description'):
+                    details.append(i.capitalize()+' \t '+str(df.iloc[current_selection-1][i]))    
+                elif(i == 'id'):
+                    details.append(i.capitalize()+' \t\t\t '+str(df.iloc[current_selection-1][i]))    
+                else:
+                    details.append(i.capitalize()+' \t\t '+str(df.iloc[current_selection-1][i]))
+            for idx,i in enumerate(details):
+                stdscr.addstr(y//2 - len(details)//2 +idx, x//2 - 15, i)
+            stdscr.refresh()
+            stdscr.getch()
+            stdscr.clear()
+            
     stdscr.clear()
-    stdscr.refresh()
