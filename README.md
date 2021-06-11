@@ -5,3 +5,10 @@ A github automations system with easy to user interface but very limited feature
 A pre pre alpha release . . . 
 
 ![](./src/SS.png)
+
+## Dependencies:
+- Selenium
+- Pandas
+
+## Support
+- Windows - Chrome only (Drivers BS)
